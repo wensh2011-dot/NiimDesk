@@ -9,6 +9,7 @@ set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
   /resource:"index.html",www/index.html ^
   /resource:"app.js",www/app.js ^
   /resource:"niimbot.js",www/niimbot.js ^
+  /resource:"i18n.js",www/i18n.js ^
   /resource:"licenses.txt",www/licenses.txt ^
   /resource:"icon.png",www/icon.png ^
   /resource:"lib\JsBarcode.all.min.js",www/lib/JsBarcode.all.min.js ^

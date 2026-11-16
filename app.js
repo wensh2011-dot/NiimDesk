@@ -1,4 +1,9 @@
-import { Niimbot } from "./niimbot.js?v=10";
+import { Niimbot } from "./niimbot.js?v=11";
+import { t, LANG, LANGS, LANG_INFO, setLang, applyStatic } from "./i18n.js?v=11";
+
+const VERSION = "1.1";
+const RTL_UI = LANG_INFO.dir === "rtl";
+applyStatic();
 
 const $ = (id) => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -13,6 +18,7 @@ const LABEL_SIZES = [
 const FONTS = [
   "Arial", "Tahoma", "Segoe UI", "Calibri", "Times New Roman", "Courier New", "Verdana", "Impact",
   "Traditional Arabic", "Simplified Arabic", "Arabic Typesetting", "Sakkal Majalla", "Aldhabi", "Andalus",
+  "Microsoft YaHei", "SimHei", "SimSun", "KaiTi", "FangSong",
 ];
 const ICONS = "★☆♥♡✓✔✗✘⚠☢☣♻⚡☀☁☂❄☃☎✉✂✈⌂☕♨⚓⚽♪♫☺☹✿❀✪➜⬅⬆⬇↻⌚⏰⚙⚑☘♛♚".split("");
 const BARCODE_FORMATS = ["CODE128", "EAN13", "EAN8", "UPC", "CODE39", "ITF14", "codabar"];
@@ -36,7 +42,7 @@ function newDoc(w, h) {
   return {
     w, h,
     elements: [{ id: uid(), type: "text", x: 2, y: 1, w: w - 4, h: h - 2, rot: 0, locked: false,
-                 text: "اضغط مرتين للتعديل", font: "Arial", size: 4, bold: true, italic: false,
+                 text: t("dblClickToEdit"), font: "Arial", size: 4, bold: true, italic: false,
                  underline: false, align: "center", fit: true, invert: false, spacing: 1.1 }],
   };
 }
@@ -255,7 +261,7 @@ function drawElement(c, el, s, ctx) {
         const ox = (W - real) / 2, oy = (H - real) / 2;
         for (let r = 0; r < n; r++) for (let k = 0; k < n; k++)
           if (q.isDark(r, k)) c.fillRect(ox + k * m, oy + r * m, m + 0.02, m + 0.02);
-      } catch (e) { drawError(c, W, H, s, "QR طويل"); }
+      } catch (e) { drawError(c, W, H, s, t("qrTooLong")); }
       break;
     }
     case "barcode": {
@@ -275,7 +281,7 @@ function drawElement(c, el, s, ctx) {
           c.font = `${textPx}px Arial`; c.textAlign = "center"; c.textBaseline = "bottom";
           c.fillText(data, W / 2, H);
         }
-      } catch (e) { drawError(c, W, H, s, "بيانات الباركود غير صالحة"); }
+      } catch (e) { drawError(c, W, H, s, t("badBarcode")); }
       break;
     }
     case "image": {
@@ -337,7 +343,7 @@ function render() {
   wrap.classList.toggle("pixelated", printPreview);
   overlay.width = cssW * devicePixelRatio; overlay.height = cssH * devicePixelRatio;
   overlay.style.width = cssW + "px"; overlay.style.height = cssH + "px";
-  $("ruler").textContent = `${doc.w} × ${doc.h} مم`;
+  $("ruler").textContent = `${doc.w} × ${doc.h} ${t("mm")}`;
   drawOverlay();
   renderBatchBar();
 }
@@ -488,10 +494,10 @@ function addElement(type) {
   let el;
   switch (type) {
     case "text":
-      el = { ...base, type, x: m, y: m, w: W - 2 * m, h: H - 2 * m, text: "نص جديد", font: "Arial", size: 3.5, bold: true, italic: false, underline: false, align: "center", fit: true, invert: false, spacing: 1.1 };
+      el = { ...base, type, x: m, y: m, w: W - 2 * m, h: H - 2 * m, text: t("newText"), font: "Arial", size: 3.5, bold: true, italic: false, underline: false, align: "center", fit: true, invert: false, spacing: 1.1 };
       break;
     case "date":
-      el = { ...base, type: "text", x: m, y: m, w: W - 2 * m, h: H - 2 * m, text: "إنتاج: {date}\nانتهاء: {date+30}", font: "Arial", size: 2.5, bold: true, italic: false, underline: false, align: "center", fit: true, invert: false, spacing: 1.15 };
+      el = { ...base, type: "text", x: m, y: m, w: W - 2 * m, h: H - 2 * m, text: t("dateText"), font: "Arial", size: 2.5, bold: true, italic: false, underline: false, align: "center", fit: true, invert: false, spacing: 1.15 };
       break;
     case "serial":
       el = { ...base, type: "text", x: W - 12, y: m, w: 11, h: H - 2 * m, text: "#{n:3}", font: "Arial", size: 3, bold: true, italic: false, underline: false, align: "center", fit: true, invert: false, spacing: 1.1 };
@@ -508,7 +514,7 @@ function addElement(type) {
       el = { ...base, type, x: m, y: H / 2 - 0.5, w: W - 2 * m, h: 1, thick: 0.3, dash: false };
       break;
     case "table":
-      el = { ...base, type, x: 0.5, y: 0.5, w: W - 1, h: H - 1, rows: 2, cols: 2, thick: 0.25, font: "Arial", bold: true, size: 2, rtl: true, cells: "الاسم|أحمد\nالسعر|25" };
+      el = { ...base, type, x: 0.5, y: 0.5, w: W - 1, h: H - 1, rows: 2, cols: 2, thick: 0.25, font: "Arial", bold: true, size: 2, rtl: RTL_UI, cells: t("tableCells") };
       break;
     case "qr": {
       const s = H - 2 * m;
@@ -588,22 +594,20 @@ function toFront() {
 
 // ============================================================ properties panel
 const props = $("props");
-const TYPE_NAMES = { text: "نص", icon: "أيقونة", rect: "إطار", line: "خط", table: "جدول", qr: "QR كود", barcode: "باركود", image: "صورة" };
+const TYPE_NAMES = { text: t("tText"), icon: t("tIcon"), rect: t("tRect"), line: t("tLine"), table: t("tTable"), qr: t("tQr"), barcode: t("tBarcode"), image: t("tImage") };
 
 function buildProps() {
   const el = sel();
   props.innerHTML = "";
   if (!el) {
-    props.innerHTML = `<h3>الملصق</h3>
+    props.innerHTML = `<h3>${t("labelTitle")}</h3>
       <div class="row">
-        <div class="field"><label>الطول (مم)</label><input type="number" id="docW" step="1" min="5" value="${doc.w}"></div>
-        <div class="field"><label>العرض (مم)</label><input type="number" id="docH" step="0.5" min="5" value="${doc.h}"></div>
+        <div class="field"><label>${t("lengthMm")}</label><input type="number" id="docW" step="1" min="5" value="${doc.w}"></div>
+        <div class="field"><label>${t("widthMm")}</label><input type="number" id="docH" step="0.5" min="5" value="${doc.h}"></div>
       </div>
-      <div class="hint">أقصى عرض للطباعة في طابعتك: ${maxLabelH()} مم</div>
-      <div class="empty-hint">اختار عنصر من الملصق لتعديله<br>أو أضف عنصر من الشريط تحت ⬇</div>
-      <div class="hint" style="margin-top:20px; line-height:2">
-        <b>اختصارات:</b><br>Del حذف · Ctrl+D تكرار<br>Ctrl+Z تراجع · Ctrl+Y إعادة<br>الأسهم للتحريك (Shift = أسرع)<br>Ctrl+S حفظ · Ctrl+P طباعة
-      </div>`;
+      <div class="hint">${t("maxWidth", { mm: maxLabelH() })}</div>
+      <div class="empty-hint">${t("emptyHint")}</div>
+      <div class="hint" style="margin-top:20px; line-height:2">${t("shortcuts")}</div>`;
     const upd = () => { doc.w = clamp(+$("docW").value || 40, 5, 300); doc.h = clamp(+$("docH").value || 12, 5, 100); syncSize(); render(); commit(); };
     $("docW").onchange = upd; $("docH").onchange = upd;
     return;
@@ -612,54 +616,54 @@ function buildProps() {
   h.push(`<h3>${TYPE_NAMES[el.type] || ""}</h3>`);
 
   if (el.type === "text") {
-    h.push(field("النص", `<textarea data-k="text" dir="auto">${esc(el.text)}</textarea>`));
-    h.push(`<div class="hint" style="margin:-6px 0 12px">رموز: {date} تاريخ اليوم · {date+30} بعد 30 يوم · {time} الوقت · {n} رقم تسلسلي · {n:3} = 001</div>`);
-    h.push(field("الخط", select("font", FONTS, el.font)));
-    h.push(`<div class="row">${field("الحجم (مم)", `<input type="number" data-k="size" step="0.25" min="0.5" value="${round2(el.fit && el._px ? el._px : el.size)}" ${el.fit ? "disabled" : ""}>`)}${field("تباعد الأسطر", `<input type="number" data-k="spacing" step="0.05" min="0.7" max="3" value="${el.spacing}">`)}${field("تباعد الحروف", `<input type="number" data-k="letter" step="0.05" min="-0.5" max="3" value="${el.letter || 0}">`)}</div>`);
+    h.push(field(t("pText"), `<textarea data-k="text" dir="auto">${esc(el.text)}</textarea>`));
+    h.push(`<div class="hint" style="margin:-6px 0 12px">${t("codesHint")}</div>`);
+    h.push(field(t("font"), select("font", FONTS, el.font)));
+    h.push(`<div class="row">${field(t("sizeMm"), `<input type="number" data-k="size" step="0.25" min="0.5" value="${round2(el.fit && el._px ? el._px : el.size)}" ${el.fit ? "disabled" : ""}>`)}${field(t("lineSpacing"), `<input type="number" data-k="spacing" step="0.05" min="0.7" max="3" value="${el.spacing}">`)}${field(t("letterSpacing"), `<input type="number" data-k="letter" step="0.05" min="-0.5" max="3" value="${el.letter || 0}">`)}</div>`);
     if (!el.fit) h.push(`<input type="range" data-k="size" min="0.5" max="${Math.max(12, doc.h)}" step="0.25" value="${el.size}" style="width:100%;margin:-4px 0 10px">`);
-    h.push(check("fit", "حجم تلقائي (ملء المربع)", el.fit));
-    h.push(field("المحاذاة", seg("align", [["right", "يمين"], ["center", "وسط"], ["left", "يسار"]], el.align)));
-    h.push(`<div class="row">${check("bold", "<b>عريض</b>", el.bold)}${check("italic", "<i>مائل</i>", el.italic)}${check("underline", "<u>تسطير</u>", el.underline)}${check("strike", "<s>شطب</s>", el.strike)}</div>`);
-    h.push(check("invert", "أبيض على أسود", el.invert));
+    h.push(check("fit", t("autoSize"), el.fit));
+    h.push(field(t("align"), seg("align", RTL_UI ? [["right", t("right")], ["center", t("center")], ["left", t("left")]] : [["left", t("left")], ["center", t("center")], ["right", t("right")]], el.align)));
+    h.push(`<div class="row">${check("bold", `<b>${t("bold")}</b>`, el.bold)}${check("italic", `<i>${t("italic")}</i>`, el.italic)}${check("underline", `<u>${t("underline")}</u>`, el.underline)}${check("strike", `<s>${t("strike")}</s>`, el.strike)}</div>`);
+    h.push(check("invert", t("invertText"), el.invert));
   }
   if (el.type === "icon") {
-    h.push(`<div class="field"><label>اختر أيقونة</label><div class="icons-grid">${ICONS.map((c) => `<button data-icon="${c}">${c}</button>`).join("")}</div></div>`);
-    h.push(field("أو اكتب رمز", `<input type="text" data-k="char" value="${esc(el.char)}" maxlength="4">`));
+    h.push(`<div class="field"><label>${t("chooseIcon")}</label><div class="icons-grid">${ICONS.map((c) => `<button data-icon="${c}">${c}</button>`).join("")}</div></div>`);
+    h.push(field(t("orTypeSymbol"), `<input type="text" data-k="char" value="${esc(el.char)}" maxlength="4">`));
   }
   if (el.type === "rect") {
-    h.push(`<div class="row">${field("السُمك (مم)", num("thick", el.thick, 0.1, 0.1))}${field("انحناء الزوايا", num("radius", el.radius, 0.5, 0))}</div>`);
-    h.push(check("fill", "تعبئة كاملة", el.fill));
+    h.push(`<div class="row">${field(t("thicknessMm"), num("thick", el.thick, 0.1, 0.1))}${field(t("cornerRadius"), num("radius", el.radius, 0.5, 0))}</div>`);
+    h.push(check("fill", t("fill"), el.fill));
   }
   if (el.type === "line") {
-    h.push(field("السُمك (مم)", num("thick", el.thick, 0.1, 0.1)));
-    h.push(check("dash", "خط متقطع", el.dash));
+    h.push(field(t("thicknessMm"), num("thick", el.thick, 0.1, 0.1)));
+    h.push(check("dash", t("dashed"), el.dash));
   }
   if (el.type === "table") {
-    h.push(`<div class="row">${field("الصفوف", num("rows", el.rows, 1, 1))}${field("الأعمدة", num("cols", el.cols, 1, 1))}</div>`);
-    h.push(field("المحتوى (كل سطر صف، افصل الخانات بـ |)", `<textarea data-k="cells" dir="auto">${esc(el.cells)}</textarea>`));
-    h.push(field("الخط", select("font", FONTS, el.font)));
-    h.push(`<div class="row">${field("سُمك الخطوط", num("thick", el.thick, 0.05, 0.1))}</div>`);
-    h.push(`<div class="row">${check("bold", "عريض", el.bold)}${check("rtl", "من اليمين لليسار", el.rtl)}</div>`);
+    h.push(`<div class="row">${field(t("rows"), num("rows", el.rows, 1, 1))}${field(t("cols"), num("cols", el.cols, 1, 1))}</div>`);
+    h.push(field(t("tableContent"), `<textarea data-k="cells" dir="auto">${esc(el.cells)}</textarea>`));
+    h.push(field(t("font"), select("font", FONTS, el.font)));
+    h.push(`<div class="row">${field(t("lineThickness"), num("thick", el.thick, 0.05, 0.1))}</div>`);
+    h.push(`<div class="row">${check("bold", t("bold"), el.bold)}${check("rtl", t("rtlTable"), el.rtl)}</div>`);
   }
   if (el.type === "qr") {
-    h.push(field("المحتوى (رابط أو نص)", `<textarea data-k="data" dir="auto">${esc(el.data)}</textarea>`));
-    h.push(field("تصحيح الأخطاء", select("ecc", ["L", "M", "Q", "H"], el.ecc)));
+    h.push(field(t("qrContent"), `<textarea data-k="data" dir="auto">${esc(el.data)}</textarea>`));
+    h.push(field(t("ecc"), select("ecc", ["L", "M", "Q", "H"], el.ecc)));
   }
   if (el.type === "barcode") {
-    h.push(field("الرقم", `<input type="text" data-k="data" value="${esc(el.data)}" dir="ltr">`));
-    h.push(field("النوع", select("format", BARCODE_FORMATS, el.format)));
-    h.push(`<div class="row">${check("showText", "إظهار الرقم", el.showText)}${field("حجم الرقم", num("textSize", el.textSize, 0.25, 1))}</div>`);
-    h.push(`<div class="hint">EAN13: 12 أو 13 رقم · EAN8: 7 أو 8 أرقام · CODE128: أي نص إنجليزي</div>`);
+    h.push(field(t("number"), `<input type="text" data-k="data" value="${esc(el.data)}" dir="ltr">`));
+    h.push(field(t("type"), select("format", BARCODE_FORMATS, el.format)));
+    h.push(`<div class="row">${check("showText", t("showNumber"), el.showText)}${field(t("numberSize"), num("textSize", el.textSize, 0.25, 1))}</div>`);
+    h.push(`<div class="hint">${t("barcodeHint")}</div>`);
   }
   if (el.type === "image") {
-    h.push(field("درجة التحويل للأبيض والأسود", `<input type="range" data-k="threshold" min="20" max="235" value="${el.threshold}" style="width:100%">`));
-    h.push(check("dither", "تدرج نقطي (للصور الفوتوغرافية)", el.dither));
-    h.push(check("invert", "عكس الألوان", el.invert));
+    h.push(field(t("bwThreshold"), `<input type="range" data-k="threshold" min="20" max="235" value="${el.threshold}" style="width:100%">`));
+    h.push(check("dither", t("dither"), el.dither));
+    h.push(check("invert", t("invertColors"), el.invert));
   }
 
   h.push(`<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">`);
-  h.push(`<div class="row">${field("X (مم)", num("x", el.x, 0.25))}${field("Y (مم)", num("y", el.y, 0.25))}</div>`);
-  h.push(`<div class="row">${field("العرض", num("w", el.w, 0.25, 0.5))}${field("الارتفاع", num("h", el.h, 0.25, 0.5))}</div>`);
+  h.push(`<div class="row">${field(`X (${t("mm")})`, num("x", el.x, 0.25))}${field(`Y (${t("mm")})`, num("y", el.y, 0.25))}</div>`);
+  h.push(`<div class="row">${field(t("width"), num("w", el.w, 0.25, 0.5))}${field(t("height"), num("h", el.h, 0.25, 0.5))}</div>`);
   props.innerHTML = h.join("");
 
   // bind inputs
@@ -731,7 +735,7 @@ function syncSize() {
   const opts = LABEL_SIZES.map(([w, h]) => `${w} × ${h}`);
   const cur = `${doc.w} × ${doc.h}`;
   if (!opts.includes(cur)) opts.push(cur);
-  sizeSel.innerHTML = opts.map((o) => `<option ${o === cur ? "selected" : ""}>${o}</option>`).join("") + `<option value="custom">مقاس مخصص...</option>`;
+  sizeSel.innerHTML = opts.map((o) => `<option ${o === cur ? "selected" : ""}>${o}</option>`).join("") + `<option value="custom">${t("customSize")}</option>`;
 }
 sizeSel.onchange = () => {
   if (sizeSel.value === "custom") { selId = null; buildProps(); $("docW").focus(); syncSize(); return; }
@@ -762,14 +766,14 @@ function toast(msg, ms = 2500) {
 }
 function setConnected(name) {
   $("dot").classList.toggle("on", !!name);
-  $("printerName").textContent = name || "اتصال بالطابعة";
+  $("printerName").textContent = name || t("connectPrinter");
   if (!name) $("battery").textContent = "";
 }
-printer.onDisconnect = () => { setConnected(null); log("انقطع الاتصال بالطابعة"); toast("انقطع الاتصال بالطابعة"); };
+printer.onDisconnect = () => { setConnected(null); log("Printer disconnected"); toast(t("disconnected")); };
 
 $("btnPrinter").onclick = async () => {
   if (printer.connected) {
-    if (confirm("قطع الاتصال بالطابعة؟")) await printer.disconnect();
+    if (confirm(t("disconnectConfirm"))) await printer.disconnect();
     return;
   }
   $("dlgConnect").showModal();
@@ -782,11 +786,12 @@ async function connectPrinter(kind, port = null, silent = false) {
   if (connectPrinter.busy || printer.connected) return;
   connectPrinter.busy = true;
   if (!Niimbot.supported(kind)) {
-    alert("المتصفح ده ما بيدعم الطريقة دي. افتح البرنامج في Microsoft Edge أو Google Chrome.");
+    alert(t("browserUnsupported"));
+    connectPrinter.busy = false;
     return;
   }
   try {
-    $("printerName").textContent = "جاري الاتصال...";
+    $("printerName").textContent = t("connecting");
     const name = await printer.connect(kind, port);
     const m = printer.info;
     if (settings.model !== name || settings.profileVer !== 7) {
@@ -796,15 +801,15 @@ async function connectPrinter(kind, port = null, silent = false) {
     }
     saveJSON("ls.settings", settings);
     setConnected(name);
-    toast("تم الاتصال بـ " + name);
+    toast(t("connectedTo", { name }));
     const bat = await printer.getBattery();
     if (bat != null) $("battery").textContent = `🔋 ${bat <= 4 ? ["", "25%", "50%", "75%", "100%"][bat] || bat : bat + "%"}`;
     render(); buildProps();
   } catch (e) {
     setConnected(null);
     if (e.name !== "NotFoundError") {
-      log("خطأ في الاتصال: " + e.message);
-      if (!silent) alert("تعذر الاتصال:\n" + e.message + "\n\nلو موقع niim.blue أو تطبيق تاني مفتوح، اقفله وجرّب تاني.");
+      log("Connection error: " + e.message);
+      if (!silent) alert(t("connectFailed", { msg: e.message }));
     }
   } finally {
     connectPrinter.busy = false;
@@ -817,17 +822,17 @@ function openPrint() {
   d.innerHTML = Array.from({ length: settings.densityMax }, (_, i) => `<option ${i + 1 === settings.density ? "selected" : ""}>${i + 1}</option>`).join("");
   $("serialField").style.display = JSON.stringify(project).includes("{n") ? "" : "none";
   $("pWhatField").style.display = project.pages.length > 1 ? "" : "none";
-  $("pWhat").innerHTML = `<option value="cur">الصفحة الحالية فقط</option><option value="all">كل الصفحات (${project.pages.length})</option>`;
+  $("pWhat").innerHTML = `<option value="cur">${t("curPageOnly")}</option><option value="all">${t("allPages", { n: project.pages.length })}</option>`;
   const hasBatch = !!(batch && batch.rows.length);
   $("pBatchField").style.display = hasBatch ? "" : "none";
   if (hasBatch) {
     $("pBatchUse").checked = true;
     $("pFrom").value = 1; $("pFrom").max = batch.rows.length;
     $("pTo").value = batch.rows.length; $("pTo").max = batch.rows.length;
-    $("pBatchInfo").textContent = `${batch.file} — ${batch.rows.length} صف`;
+    $("pBatchInfo").textContent = t("rowsCount", { file: batch.file, n: batch.rows.length });
   }
   $("pBar").style.width = "0";
-  $("pStatus").textContent = printer.connected ? "جاهز" : "⚠ الطابعة غير متصلة";
+  $("pStatus").textContent = printer.connected ? t("ready") : t("notConnectedWarn");
   $("pGo").disabled = false;
   $("dlgPrint").showModal();
 }
@@ -844,10 +849,10 @@ $("pGo").onclick = async () => {
   const from = clamp(+$("pFrom").value || 1, 1, batch?.rows.length || 1);
   const to = clamp(+$("pTo").value || from, from, batch?.rows.length || 1);
   const rows = useBatch ? batch.rows.slice(from - 1, to) : [batchRow()];
-  if (pagesSel.some((p) => p.h > maxLabelH() + 0.01)) toast(`تنبيه: عرض الملصق أكبر من رأس الطباعة (${maxLabelH()} مم) وسيتم قص الأطراف`, 4000);
+  if (pagesSel.some((p) => p.h > maxLabelH() + 0.01)) toast(t("headWarn", { mm: maxLabelH() }), 4000);
 
   $("pGo").disabled = true;
-  $("pStatus").textContent = "جاري التجهيز...";
+  $("pStatus").textContent = t("preparing");
   try {
     const s = dpm();
     const pages = [];
@@ -863,19 +868,19 @@ $("pGo").onclick = async () => {
         pages.push(first);
       }
     }
-    if (pages.length > 300 && !confirm(`حيتم طباعة ${pages.length} ملصق. متأكد؟`)) throw new Error("تم الإلغاء");
-    await printer.printCanvases(pages, { density, flip: settings.flip }, (f, p, t) => {
+    if (pages.length > 300 && !confirm(t("confirmMany", { n: pages.length }))) throw new Error(t("cancelled"));
+    await printer.printCanvases(pages, { density, flip: settings.flip }, (f, p, tot) => {
       $("pBar").style.width = (f * 100).toFixed(1) + "%";
-      $("pStatus").textContent = `جاري الطباعة... ${p} / ${t}`;
+      $("pStatus").textContent = t("printing", { p, t: tot });
     });
     $("pBar").style.width = "100%";
-    $("pStatus").textContent = "✔ تمت الطباعة";
-    log("تمت الطباعة");
+    $("pStatus").textContent = t("printed");
+    log("Printed");
     addHistory(pagesSel, pages[0], pages.length);
     if (hasSerial) $("pSerial").value = serial;
   } catch (e) {
-    $("pStatus").textContent = "✖ خطأ: " + e.message;
-    log("خطأ في الطباعة: " + e.message);
+    $("pStatus").textContent = t("errorMsg", { msg: e.message });
+    log("Print error: " + e.message);
   }
   $("pGo").disabled = false;
 };
@@ -893,32 +898,32 @@ function cropToHead(cv, head) {
 $("btnSettings").onclick = () => {
   const i = printer.connected ? printer.info : null;
   $("sInfo").innerHTML = i
-    ? `الطابعة: <b>${esc(printer.deviceName)}</b><br>الموديل: ${i.model} · الدقة: ${i.dpi} DPI · رأس الطباعة: ${i.head} نقطة<br>طريقة الطباعة: ${i.task} · البروتوكول: ${i.protocol ?? "-"}`
-    : "الطابعة غير متصلة";
+    ? t("printerInfo", { name: esc(printer.deviceName), model: i.model, dpi: i.dpi, head: i.head, task: i.task, protocol: i.protocol ?? "-" })
+    : t("notConnected");
   $("sFlip").checked = settings.flip;
   $("dlgSettings").showModal();
 };
 $("sClose").onclick = () => $("dlgSettings").close();
 $("sCopyLog").onclick = async () => {
-  try { await navigator.clipboard.writeText($("log").textContent); toast("تم نسخ السجل"); } catch { toast("تعذر النسخ"); }
+  try { await navigator.clipboard.writeText($("log").textContent); toast(t("logCopied")); } catch { toast(t("copyFailed")); }
 };
 $("sSave").onclick = () => {
   settings.flip = $("sFlip").checked;
   saveJSON("ls.settings", settings);
-  $("dlgSettings").close(); render(); buildProps(); toast("تم حفظ الإعدادات");
+  $("dlgSettings").close(); render(); buildProps(); toast(t("settingsSaved"));
 };
 
 // ============================================================ templates
 const getTemplates = () => { try { return JSON.parse(localStorage.getItem("ls.templates") || "[]"); } catch { return []; } };
-const setTemplates = (t) => { try { localStorage.setItem("ls.templates", JSON.stringify(t)); return true; } catch { alert("المساحة ممتلئة. احذف بعض القوالب أو صدّرها كملفات."); return false; } };
+const setTemplates = (list) => { try { localStorage.setItem("ls.templates", JSON.stringify(list)); return true; } catch { alert(t("storageFull")); return false; } };
 
 function saveTemplatePrompt() {
-  const name = prompt("اسم القالب:", project.name || "ملصق " + new Date().toLocaleDateString("ar"));
+  const name = prompt(t("tplNamePrompt"), project.name || t("labelN", { d: new Date().toLocaleDateString(LANG_INFO.locale) }));
   if (!name) return;
   project.name = name;
   const list = getTemplates().filter((t) => t.name !== name);
   list.unshift({ name, project: { pages: deep(project.pages), name }, date: Date.now() });
-  if (setTemplates(list)) toast("تم حفظ القالب: " + name);
+  if (setTemplates(list)) toast(t("tplSaved", { name }));
   commit();
 }
 $("btnSave").onclick = saveTemplatePrompt;
@@ -927,13 +932,13 @@ function renderTplList() {
   const list = getTemplates();
   $("tplList").innerHTML = list.length ? list.map((t, i) => `
     <div class="tpl"><span data-open="${i}">📄 ${esc(t.name)} <small class="hint">${tplInfo(t)}</small></span>
-    <button class="btn" data-delt="${i}">🗑</button></div>`).join("") : `<div class="empty-hint" style="margin:10px">لا توجد قوالب محفوظة بعد</div>`;
+    <button class="btn" data-delt="${i}">🗑</button></div>`).join("") : `<div class="empty-hint" style="margin:10px">${t("noTemplates")}</div>`;
   $("tplList").querySelectorAll("[data-open]").forEach((s) => (s.onclick = () => { const t = list[+s.dataset.open]; loadDoc(t.project || t.doc); $("dlgTpl").close(); }));
-  $("tplList").querySelectorAll("[data-delt]").forEach((b) => (b.onclick = () => { if (confirm("حذف القالب؟")) { list.splice(+b.dataset.delt, 1); setTemplates(list); renderTplList(); } }));
+  $("tplList").querySelectorAll("[data-delt]").forEach((b) => (b.onclick = () => { if (confirm(t("deleteTplConfirm"))) { list.splice(+b.dataset.delt, 1); setTemplates(list); renderTplList(); } }));
 }
-function tplInfo(t) {
-  const pages = t.project ? t.project.pages : [t.doc];
-  return pages.length > 1 ? `${pages.length} صفحات` : `${pages[0].w}×${pages[0].h}`;
+function tplInfo(tpl) {
+  const pages = tpl.project ? tpl.project.pages : [tpl.doc];
+  return pages.length > 1 ? t("pagesN", { n: pages.length }) : `${pages[0].w}×${pages[0].h}`;
 }
 function loadDoc(d) {
   project = toProject(d); doc = project.pages[0];
@@ -941,7 +946,7 @@ function loadDoc(d) {
 }
 $("btnTemplates").onclick = () => { renderPresets(); renderTplList(); $("dlgTpl").showModal(); };
 $("tClose").onclick = () => $("dlgTpl").close();
-$("tNew").onclick = () => { if (confirm("بدء ملصق جديد؟ (التغييرات غير المحفوظة ستضيع)")) { loadDoc(newDoc(doc.w, doc.h)); $("dlgTpl").close(); } };
+$("tNew").onclick = () => { if (confirm(t("newLabelConfirm"))) { loadDoc(newDoc(doc.w, doc.h)); $("dlgTpl").close(); } };
 $("tExport").onclick = () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify({ name: project.name, pages: project.pages }, null, 1)], { type: "application/json" }));
@@ -950,8 +955,8 @@ $("tExport").onclick = () => {
 $("tImport").onclick = () => { $("fileTpl").value = ""; $("fileTpl").click(); };
 $("fileTpl").onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
-  try { const d = JSON.parse(await f.text()); if (!d.elements && !d.pages) throw 0; loadDoc(d); $("dlgTpl").close(); toast("تم فتح الملف"); }
-  catch { alert("الملف غير صالح"); }
+  try { const d = JSON.parse(await f.text()); if (!d.elements && !d.pages) throw 0; loadDoc(d); $("dlgTpl").close(); toast(t("fileOpened")); }
+  catch { alert(t("invalidFile")); }
 };
 
 // ============================================================ pages (artboards)
@@ -959,22 +964,22 @@ function renderPagesBar() {
   const bar = $("pagesBar");
   bar.innerHTML = project.pages.map((p, i) => {
     const on = i === project.cur;
-    return `<div class="ptab ${on ? "on" : ""}" data-p="${i}" title="اضغط مرتين لتغيير الاسم">
-      <span class="pname">${esc(p.title || "صفحة " + (i + 1))}</span><small>${p.w}×${p.h}</small>
-      ${on ? `<button class="pact" data-act="dup" title="تكرار الصفحة">⧉</button>${project.pages.length > 1 ? `<button class="pact" data-act="del" title="حذف الصفحة">✕</button>` : ""}` : ""}
+    return `<div class="ptab ${on ? "on" : ""}" data-p="${i}" title="${t("renameHint")}">
+      <span class="pname">${esc(p.title || t("pageN", { n: i + 1 }))}</span><small>${p.w}×${p.h}</small>
+      ${on ? `<button class="pact" data-act="dup" title="${t("dupPage")}">⧉</button>${project.pages.length > 1 ? `<button class="pact" data-act="del" title="${t("delPage")}">✕</button>` : ""}` : ""}
     </div>`;
-  }).join("") + `<button class="ptab padd" id="pageAdd" title="صفحة جديدة">＋ صفحة</button>`;
-  bar.querySelectorAll(".ptab[data-p]").forEach((t) => {
-    t.onclick = (e) => {
+  }).join("") + `<button class="ptab padd" id="pageAdd" title="${t("newPage")}">${t("addPage")}</button>`;
+  bar.querySelectorAll(".ptab[data-p]").forEach((tab) => {
+    tab.onclick = (e) => {
       const act = e.target.dataset.act;
       if (act === "dup") return duplicatePage();
       if (act === "del") return deletePage();
-      switchPage(+t.dataset.p);
+      switchPage(+tab.dataset.p);
     };
-    t.ondblclick = (e) => {
+    tab.ondblclick = (e) => {
       if (e.target.dataset.act) return;
-      const p = project.pages[+t.dataset.p];
-      const n = prompt("اسم الصفحة:", p.title || "صفحة " + (+t.dataset.p + 1));
+      const p = project.pages[+tab.dataset.p];
+      const n = prompt(t("pageNamePrompt"), p.title || t("pageN", { n: +tab.dataset.p + 1 }));
       if (n !== null) { p.title = n.trim() || undefined; commit(); renderPagesBar(); }
     };
   });
@@ -989,18 +994,18 @@ function addPage() {
   project.pages.push(newDoc(doc.w, doc.h));
   project.cur = project.pages.length - 1; doc = project.pages[project.cur]; selId = null;
   syncSize(); fitZoom(); render(); buildProps(); updateToolbar(); renderPagesBar(); commit();
-  toast("تمت إضافة صفحة جديدة");
+  toast(t("pageAdded"));
 }
 function duplicatePage() {
   const copy = deep(doc);
   copy.elements.forEach((e) => (e.id = uid()));
-  if (copy.title) copy.title += " (نسخة)";
+  if (copy.title) copy.title += t("copySuffix");
   project.pages.splice(project.cur + 1, 0, copy);
   project.cur++; doc = project.pages[project.cur]; selId = null;
   render(); buildProps(); updateToolbar(); renderPagesBar(); commit();
 }
 function deletePage() {
-  if (project.pages.length < 2 || !confirm("حذف الصفحة دي؟")) return;
+  if (project.pages.length < 2 || !confirm(t("delPageConfirm"))) return;
   project.pages.splice(project.cur, 1);
   project.cur = Math.min(project.cur, project.pages.length - 1); doc = project.pages[project.cur]; selId = null;
   syncSize(); fitZoom(); render(); buildProps(); updateToolbar(); renderPagesBar(); commit();
@@ -1012,13 +1017,13 @@ function batchRow() {
 }
 function saveBatch() {
   try { batch ? localStorage.setItem("ls.batch", JSON.stringify(batch)) : localStorage.removeItem("ls.batch"); }
-  catch { toast("الملف كبير، ما اتحفظ للمرة الجاية لكنه شغال هسي"); }
+  catch { toast(t("xBigFile")); }
 }
 function renderBatchBar() {
   const bar = $("batchBar");
   if (!batch || !batch.rows.length) { bar.style.display = "none"; return; }
   bar.style.display = "";
-  $("bPos").textContent = `صف ${batch.cur + 1} من ${batch.rows.length}`;
+  $("bPos").textContent = t("bRow", { cur: batch.cur + 1, total: batch.rows.length });
   $("bFile").textContent = "📊 " + batch.file;
 }
 $("bPrev").onclick = () => { if (batch.cur > 0) { batch.cur--; saveBatch(); render(); } };
@@ -1032,8 +1037,8 @@ function openBatch() {
 function renderBatchDlg() {
   const has = !!(batch && batch.rows.length);
   $("xInfo").innerHTML = has
-    ? `الملف: <b>${esc(batch.file)}</b> — ${batch.rows.length} صف، ${batch.cols.length} عمود`
-    : "اختار ملف Excel أو CSV. أول صف في الملف لازم يكون أسماء الأعمدة (مثلاً: الاسم، السعر، الكود).";
+    ? t("xInfoFile", { file: esc(batch.file), rows: batch.rows.length, cols: batch.cols.length })
+    : t("xInfoEmpty");
   $("xCols").innerHTML = has ? batch.cols.map((c) => `<button class="chip" data-col="${esc(c)}">{${esc(c)}}</button>`).join("") : "";
   $("xColsWrap").style.display = has ? "" : "none";
   $("xClear").style.display = has ? "" : "none";
@@ -1042,13 +1047,13 @@ function renderBatchDlg() {
     const head = batch.cols.slice(0, 6);
     $("xPreview").innerHTML = `<table><tr>${head.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>` +
       batch.rows.slice(0, 5).map((r) => `<tr>${head.map((c) => `<td>${esc(r[c])}</td>`).join("")}</tr>`).join("") +
-      `</table>${batch.rows.length > 5 ? `<div class="hint">... و ${batch.rows.length - 5} صف كمان</div>` : ""}`;
+      `</table>${batch.rows.length > 5 ? `<div class="hint">${t("xMoreRows", { n: batch.rows.length - 5 })}</div>` : ""}`;
   } else $("xPreview").innerHTML = "";
 }
 function insertColumn(col) {
   const tag = `{${col}}`;
   const el = sel();
-  if (el && el.type === "text") el.text = el.text && el.text !== "نص جديد" ? el.text + " " + tag : tag;
+  if (el && el.type === "text") el.text = el.text && el.text !== t("newText") ? el.text + " " + tag : tag;
   else if (el && (el.type === "qr" || el.type === "barcode")) el.data = tag;
   else if (el && el.type === "table") el.cells = (el.cells ? el.cells + "\n" : "") + col + "|" + tag;
   else {
@@ -1056,7 +1061,7 @@ function insertColumn(col) {
     sel().text = tag;
   }
   commit(); render(); buildProps();
-  toast(`تمت إضافة ${tag}`);
+  toast(t("xAdded", { tag }));
 }
 $("xPick").onclick = () => { $("fileXls").value = ""; $("fileXls").click(); };
 $("fileXls").onchange = async (e) => {
@@ -1067,19 +1072,19 @@ $("fileXls").onchange = async (e) => {
     else wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
-    const cols = (grid[0] || []).map((c, i) => String(c).trim() || `عمود${i + 1}`);
+    const cols = (grid[0] || []).map((c, i) => String(c).trim() || t("xColumn", { n: i + 1 }));
     const rows = grid.slice(1)
       .filter((r) => r.some((v) => String(v).trim() !== ""))
       .map((r) => Object.fromEntries(cols.map((c, i) => [c, String(r[i] ?? "").trim()])));
-    if (!cols.length || !rows.length) throw new Error("الملف فاضي");
+    if (!cols.length || !rows.length) throw new Error(t("xEmptyFile"));
     batch = { file: f.name, cols, rows, cur: 0 };
     saveBatch(); renderBatchDlg(); render();
-    log(`Excel: ${f.name} — ${rows.length} صف، أعمدة: ${cols.join("، ")}`);
+    log(`Excel: ${f.name} — ${rows.length} rows, columns: ${cols.join(", ")}`);
   } catch (err) {
-    alert("تعذر قراءة الملف: " + err.message);
+    alert(t("xReadError", { msg: err.message }));
   }
 };
-$("xClear").onclick = () => { if (confirm("إلغاء ربط ملف Excel؟")) { batch = null; saveBatch(); renderBatchDlg(); render(); } };
+$("xClear").onclick = () => { if (confirm(t("xUnlinkConfirm"))) { batch = null; saveBatch(); renderBatchDlg(); render(); } };
 $("xClose").onclick = () => $("dlgBatch").close();
 
 // ============================================================ USB auto-connect
@@ -1109,56 +1114,56 @@ const R = (x, y, w, h, o = {}) => ({ id: uid(), type: "rect", x, y, w, h, rot: 0
 const I = (x, y, s, char) => ({ id: uid(), type: "icon", x, y, w: s, h: s, rot: 0, locked: false, char });
 
 const PRESETS = [
-  { name: "ملصق سعر", make: (W, H) => [
-    T(W * 0.42, 0.6, W * 0.58 - 1, H - 1.2, "اسم المنتج"),
-    T(0.6, 0.6, W * 0.4 - 0.6, H * 0.62, "250", { invert: true }),
-    T(0.6, 0.5 + H * 0.62, W * 0.4 - 0.6, H * 0.38 - 1.1, "جنيه", { invert: true, bold: false }),
+  { name: t("prPrice"), make: (W, H) => [
+    T(W * 0.42, 0.6, W * 0.58 - 1, H - 1.2, t("prdName")),
+    T(0.6, 0.6, W * 0.4 - 0.6, H * 0.62, "25", { invert: true }),
+    T(0.6, 0.5 + H * 0.62, W * 0.4 - 0.6, H * 0.38 - 1.1, t("currency"), { invert: true, bold: false }),
   ] },
-  { name: "عرض خاص (سعر مشطوب)", make: (W, H) => [
-    T(0.6, 0.6, W * 0.2, H - 1.2, "عرض", { invert: true }),
-    T(W * 0.23, 0.6, W * 0.32, H * 0.45, "اسم المنتج"),
-    T(W * 0.23, H * 0.5, W * 0.32, H * 0.42, "300 جنيه", { strike: true, bold: false }),
-    T(W * 0.57, 0.6, W * 0.43 - 0.8, H - 1.2, "250"),
+  { name: t("prOffer"), make: (W, H) => [
+    T(0.6, 0.6, W * 0.2, H - 1.2, t("offer"), { invert: true }),
+    T(W * 0.23, 0.6, W * 0.32, H * 0.45, t("prdName")),
+    T(W * 0.23, H * 0.5, W * 0.32, H * 0.42, t("oldPrice"), { strike: true, bold: false }),
+    T(W * 0.57, 0.6, W * 0.43 - 0.8, H - 1.2, t("newPrice")),
   ] },
-  { name: "صلاحية (إنتاج وانتهاء)", make: (W, H) => [
-    T(0.6, 0.6, W - 1.2, H * 0.4, "اسم الصنف", { invert: true }),
-    T(0.6, H * 0.46, W - 1.2, H * 0.5, "إنتاج: {date}\nانتهاء: {date+7}", { spacing: 1.15 }),
+  { name: t("prExpiry"), make: (W, H) => [
+    T(0.6, 0.6, W - 1.2, H * 0.4, t("itemName"), { invert: true }),
+    T(0.6, H * 0.46, W - 1.2, H * 0.5, t("expiryText"), { spacing: 1.15 }),
   ] },
-  { name: "اسم", make: (W, H) => [
+  { name: t("prName"), make: (W, H) => [
     R(0.5, 0.5, W - 1, H - 1, { thick: 0.4, radius: 2 }),
-    T(2, 1.5, W - 4, H - 3, "محمد أحمد"),
+    T(2, 1.5, W - 4, H - 3, t("personName")),
   ] },
-  { name: "ملف / مجلد", make: (W, H) => [
+  { name: t("prFile"), make: (W, H) => [
     T(W * 0.72, 0.6, W * 0.28 - 0.6, H - 1.2, "2026", { invert: true }),
-    T(0.8, 0.6, W * 0.7 - 1.2, H * 0.55, "عقود الموردين"),
-    T(0.8, H * 0.58, W * 0.7 - 1.2, H * 0.36, "قسم المشتريات", { bold: false }),
+    T(0.8, 0.6, W * 0.7 - 1.2, H * 0.55, t("folderTitle")),
+    T(0.8, H * 0.58, W * 0.7 - 1.2, H * 0.36, t("folderDept"), { bold: false }),
   ] },
-  { name: "كابل", make: (W, H) => [
+  { name: t("prCable"), make: (W, H) => [
     I(W - H * 0.7 - 0.8, H * 0.15, H * 0.7, "⚡"),
-    T(0.8, 0.8, W - H * 0.7 - 2.2, H - 1.6, "راوتر ← تلفزيون"),
+    T(0.8, 0.8, W - H * 0.7 - 2.2, H - 1.6, t("cableText")),
   ] },
-  { name: "منتج بباركود", make: (W, H) => [
-    T(0.8, 0.4, W - 1.6, H * 0.32, "اسم المنتج — 250 جنيه"),
+  { name: t("prBarcode"), make: (W, H) => [
+    T(0.8, 0.4, W - 1.6, H * 0.32, t("productLine")),
     { id: uid(), type: "barcode", x: W * 0.12, y: H * 0.36, w: W * 0.76, h: H * 0.6, rot: 0, locked: false, data: "6221234567890", format: "CODE128", showText: true, textSize: 1.6 },
   ] },
-  { name: "رابط QR", make: (W, H) => [
+  { name: t("prQr"), make: (W, H) => [
     { id: uid(), type: "qr", x: 0.8, y: 0.8, w: H - 1.6, h: H - 1.6, rot: 0, locked: false, data: "https://example.com", ecc: "M" },
-    T(H, 0.8, W - H - 0.8, H - 1.6, "امسح الكود\nلزيارة موقعنا", { spacing: 1.15 }),
+    T(H, 0.8, W - H - 0.8, H - 1.6, t("scanText"), { spacing: 1.15 }),
   ] },
-  { name: "رقم تلفون", make: (W, H) => [
+  { name: t("prPhone"), make: (W, H) => [
     I(W - H * 0.75 - 0.8, H * 0.125, H * 0.75, "☎"),
     T(0.8, 0.8, W - H * 0.75 - 2.2, H - 1.6, "0912345678"),
   ] },
-  { name: "تحذير", make: (W, H) => [
+  { name: t("prWarning"), make: (W, H) => [
     I(W - H * 0.8 - 0.6, H * 0.1, H * 0.8, "⚠"),
-    T(0.6, 0.8, W - H * 0.8 - 1.8, H - 1.6, "قابل للكسر", { invert: true }),
+    T(0.6, 0.8, W - H * 0.8 - 1.8, H - 1.6, t("fragile"), { invert: true }),
   ] },
-  { name: "ترقيم تسلسلي", make: (W, H) => [
+  { name: t("prSerial"), make: (W, H) => [
     R(0.5, 0.5, W - 1, H - 1),
-    T(W * 0.5, 1.2, W * 0.5 - 1.8, H - 2.4, "أصل رقم", { bold: false }),
+    T(W * 0.5, 1.2, W * 0.5 - 1.8, H - 2.4, t("assetNo"), { bold: false }),
     T(1.8, 1.2, W * 0.5 - 2.6, H - 2.4, "{n:4}"),
   ] },
-  { name: "فاضي", make: () => [] },
+  { name: t("prBlank"), make: () => [] },
 ];
 
 function presetPage(p) {
@@ -1182,7 +1187,7 @@ function renderPresets() {
       doc = project.pages[project.cur]; selId = null;
       syncSize(); fitZoom(); render(); buildProps(); updateToolbar(); renderPagesBar(); commit();
       $("dlgTpl").close();
-      toast(emptyCur ? "تم تطبيق القالب" : "تمت إضافة القالب في صفحة جديدة");
+      toast(emptyCur ? t("tplApplied") : t("tplAddedNewPage"));
     };
     g.appendChild(b);
   });
@@ -1217,23 +1222,23 @@ function renderHistory() {
   $("histList").innerHTML = list.length ? list.map((h, i) => `
     <div class="hist">
       <img src="${h.thumb}" alt="">
-      <div class="hmeta"><b>${esc(h.name || "ملصق")}</b>
-        <small class="hint">${new Date(h.date).toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" })} · اتطبع ${h.count} مرة${h.pages.length > 1 ? ` · ${h.pages.length} صفحات` : ""}</small></div>
-      <button class="btn" data-hprint="${i}">🖨 طباعة</button>
-      <button class="btn" data-hopen="${i}">فتح</button>
+      <div class="hmeta"><b>${esc(h.name || t("label"))}</b>
+        <small class="hint">${new Date(h.date).toLocaleString(LANG_INFO.locale, { dateStyle: "medium", timeStyle: "short" })} · ${t("printedTimes", { n: h.count })}${h.pages.length > 1 ? ` · ${t("pagesN", { n: h.pages.length })}` : ""}</small></div>
+      <button class="btn" data-hprint="${i}">${t("printBtn")}</button>
+      <button class="btn" data-hopen="${i}">${t("openBtn")}</button>
       <button class="btn" data-hdel="${i}">🗑</button>
-    </div>`).join("") : `<div class="empty-hint" style="margin:10px">لسه ما طبعت أي ملصق</div>`;
+    </div>`).join("") : `<div class="empty-hint" style="margin:10px">${t("histEmpty")}</div>`;
   const open = (i) => { loadDoc({ pages: list[i].pages, name: list[i].name || undefined }); $("dlgHistory").close(); };
-  $("histList").querySelectorAll("[data-hopen]").forEach((b) => (b.onclick = () => { open(+b.dataset.hopen); toast("تم فتح الملصق (Ctrl+Z للرجوع للشغل السابق)"); }));
+  $("histList").querySelectorAll("[data-hopen]").forEach((b) => (b.onclick = () => { open(+b.dataset.hopen); toast(t("histOpened")); }));
   $("histList").querySelectorAll("[data-hprint]").forEach((b) => (b.onclick = () => { open(+b.dataset.hprint); openPrint(); if (project.pages.length > 1) $("pWhat").value = "all"; }));
   $("histList").querySelectorAll("[data-hdel]").forEach((b) => (b.onclick = () => { list.splice(+b.dataset.hdel, 1); setHistory(list); renderHistory(); }));
 }
 $("btnHistory").onclick = () => { renderHistory(); $("dlgHistory").showModal(); };
 $("hClose").onclick = () => $("dlgHistory").close();
-$("hClear").onclick = () => { if (confirm("مسح كل سجل الطباعة؟")) { setHistory([]); renderHistory(); } };
+$("hClear").onclick = () => { if (confirm(t("clearHistConfirm"))) { setHistory([]); renderHistory(); } };
 
 // ============================================================ backup / restore
-const BACKUP_KEYS = ["ls.project", "ls.templates", "ls.history", "ls.settings", "ls.batch"];
+const BACKUP_KEYS = ["ls.project", "ls.templates", "ls.history", "ls.settings", "ls.batch", "ls.lang"];
 $("tBackup").onclick = () => {
   const data = { app: "niimdesk", version: 1, date: new Date().toISOString(), store: {} };
   for (const k of BACKUP_KEYS) { const v = localStorage.getItem(k); if (v != null) data.store[k] = v; }
@@ -1241,21 +1246,29 @@ $("tBackup").onclick = () => {
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
   a.download = `niimdesk-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
-  toast("تم حفظ النسخة الاحتياطية في مجلد التنزيلات");
+  toast(t("backupSaved"));
 };
 $("tRestore").onclick = () => { $("fileBackup").value = ""; $("fileBackup").click(); };
 $("fileBackup").onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
   try {
     const data = JSON.parse(await f.text());
-    if (!["niimdesk", "label-studio"].includes(data.app) || !data.store) throw new Error("ده ما ملف نسخة احتياطية");
-    if (!confirm("استرجاع النسخة الاحتياطية حيبدّل الشغل الحالي والقوالب والسجل. متأكد؟")) return;
+    if (!["niimdesk", "label-studio"].includes(data.app) || !data.store) throw new Error(t("notBackup"));
+    if (!confirm(t("restoreConfirm"))) return;
     for (const k of BACKUP_KEYS) {
       if (typeof data.store[k] === "string") { JSON.parse(data.store[k]); localStorage.setItem(k, data.store[k]); }
     }
     location.reload();
-  } catch (err) { alert("تعذر الاسترجاع: " + err.message); }
+  } catch (err) { alert(t("restoreFailed", { msg: err.message })); }
 };
+
+// ============================================================ language
+const langSel = $("langSel");
+langSel.innerHTML = LANGS.map((l) => `<option value="${l.code}" ${l.code === LANG ? "selected" : ""}>${l.name}</option>`).join("");
+langSel.onchange = () => { commit(); setLang(langSel.value); };
+$("sAbout").innerHTML = t("about", { v: VERSION });
+$("bPrev").textContent = RTL_UI ? "▶" : "◀";
+$("bNext").textContent = RTL_UI ? "◀" : "▶";
 
 // ============================================================ init
 window.addEventListener("resize", () => render());
@@ -1265,5 +1278,5 @@ render();
 buildProps();
 updateToolbar();
 renderPagesBar();
-if (!Niimbot.supported("usb") && !Niimbot.supported("ble")) toast("⚠ افتح البرنامج في Edge أو Chrome عشان الطابعة تشتغل", 6000);
+if (!Niimbot.supported("usb") && !Niimbot.supported("ble")) toast(t("openInEdge"), 6000);
 autoConnect();

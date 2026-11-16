@@ -59,7 +59,7 @@ export class Niimbot {
     this.deviceName = kind === "usb" ? `${client.getModelMetadata()?.model || "NIIMBOT"} (USB)` : (res.deviceName || "NIIMBOT");
     client.startHeartbeat();
     const i = this.info;
-    this.log(`متصل: ${this.deviceName} — موديل ${i.model}، DPI ${i.dpi}، رأس ${i.head}px، بروتوكول ${i.protocol}، مهمة الطباعة ${i.task}`);
+    this.log(`Connected: ${this.deviceName} — model ${i.model}, DPI ${i.dpi}, head ${i.head}px, protocol ${i.protocol}, print task ${i.task}`);
     return this.deviceName;
   }
 
@@ -91,7 +91,7 @@ export class Niimbot {
       }
       return NB.ImageEncoder.encodeCanvas(src, NB.PageColorType?.SingleColor ?? 0, info.direction);
     });
-    this.log(`طباعة ${total} نسخة بمهمة ${taskName} — ${encoded[0].cols}×${encoded[0].rows}px، كثافة ${density}`);
+    this.log(`Printing ${total} label(s) with task ${taskName} — ${encoded[0].cols}×${encoded[0].rows}px, density ${density}`);
 
     const onProg = (e) => onProgress && onProgress(
       Math.min(1, ((e.page - 1) + (e.pagePrintProgress + e.pageFeedProgress) / 200) / total), e.page, total);

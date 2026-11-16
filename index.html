@@ -20,7 +20,7 @@
   /* ---------- header ---------- */
   header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: var(--panel);
            border-bottom: 1px solid var(--line); }
-  .brand { font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 8px; margin-left: 8px; }
+  .brand { font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 8px; margin-inline-end: 8px; }
   .brand i { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: inline-block; position: relative; }
   .brand i::after { content: ""; position: absolute; inset: 9px 5px; background: #fff; border-radius: 2px; }
   .pill { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid transparent;
@@ -60,7 +60,7 @@
   #ruler { position: absolute; bottom: -24px; left: 0; right: 0; text-align: center; color: var(--muted); font-size: 12px; }
   .pixelated #view { image-rendering: pixelated; }
 
-  aside { width: 300px; background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 16px; }
+  aside { width: 300px; background: var(--panel); border-inline-end: 1px solid var(--line); overflow-y: auto; padding: 16px; }
   aside h3 { margin: 0 0 12px; font-size: 15px; }
   .empty-hint { color: var(--muted); text-align: center; margin-top: 40px; line-height: 1.8; }
   .field { margin-bottom: 12px; }
@@ -73,7 +73,7 @@
   .row > * { flex: 1; }
   .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
   .seg button { flex: 1; border: 0; background: #fff; padding: 6px 0; }
-  .seg button + button { border-right: 1px solid var(--line); }
+  .seg button + button { border-inline-start: 1px solid var(--line); }
   .seg button.on { background: var(--accent-2); color: var(--accent); font-weight: 600; }
   .check { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; cursor: pointer; }
   .hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
@@ -121,7 +121,7 @@
   .chip { border: 1px solid var(--accent); color: var(--accent); background: var(--accent-2); border-radius: 999px; padding: 4px 10px; margin: 3px; }
   .chip:hover { background: var(--accent); color: #fff; }
   #xPreview table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 8px; }
-  #xPreview th, #xPreview td { border: 1px solid var(--line); padding: 4px 6px; text-align: right; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #xPreview th, #xPreview td { border: 1px solid var(--line); padding: 4px 6px; text-align: start; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #xPreview th { background: var(--bg); }
   .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .preset { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; font-size: 12px; }
@@ -136,42 +136,45 @@
   .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: #222; color: #fff;
            padding: 10px 18px; border-radius: 10px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; }
   .toast.show { opacity: 1; }
+  html[lang=zh] body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+  #langSel { border: 0; background: transparent; outline: none; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand"><i></i> NiimDesk <span class="hint" style="font-weight:400;font-size:12px">نسخة الكمبيوتر</span></div>
-  <button class="pill" id="btnPrinter"><span class="dot" id="dot"></span><span id="printerName">اتصال بالطابعة</span><span id="battery" class="hint"></span></button>
+  <div class="brand"><i></i> NiimDesk <span class="hint" style="font-weight:400;font-size:12px" data-i18n="pcVersion"></span></div>
+  <button class="pill" id="btnPrinter"><span class="dot" id="dot"></span><span id="printerName" data-i18n="connectPrinter"></span><span id="battery" class="hint"></span></button>
   <div class="pill">
-    <span class="hint">المقاس</span>
+    <span class="hint" data-i18n="size"></span>
     <select id="sizeSel"></select>
   </div>
   <div class="spacer"></div>
-  <button class="btn" id="btnHistory">🕘 السجل</button>
-  <button class="btn" id="btnTemplates">📁 القوالب</button>
-  <button class="btn" id="btnSave">💾 حفظ</button>
-  <button class="btn" id="btnSettings">⚙ الإعدادات</button>
-  <button class="btn-primary" id="btnPrint">طباعة</button>
+  <div class="pill" title="Language / اللغة / 语言">🌐 <select id="langSel"></select></div>
+  <button class="btn" id="btnHistory" data-i18n="history"></button>
+  <button class="btn" id="btnTemplates" data-i18n="templates"></button>
+  <button class="btn" id="btnSave" data-i18n="save"></button>
+  <button class="btn" id="btnSettings" data-i18n="settings"></button>
+  <button class="btn-primary" id="btnPrint" data-i18n="print"></button>
 </header>
 
 <div class="toolbar">
-  <button class="tb" id="tbDelete" data-tip="حذف (Del)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
-  <button class="tb" id="tbRotate" data-tip="تدوير 90°"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg></button>
-  <button class="tb" id="tbDup" data-tip="تكرار (Ctrl+D)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M14 11v6M11 14h6"/></svg></button>
-  <button class="tb" id="tbLock" data-tip="قفل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3M12 15v2"/></svg></button>
+  <button class="tb" id="tbDelete" data-i18n-tip="tipDelete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
+  <button class="tb" id="tbRotate" data-i18n-tip="tipRotate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg></button>
+  <button class="tb" id="tbDup" data-i18n-tip="tipDup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M14 11v6M11 14h6"/></svg></button>
+  <button class="tb" id="tbLock" data-i18n-tip="tipLock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3M12 15v2"/></svg></button>
   <span class="sep"></span>
-  <button class="tb" id="tbUndo" data-tip="تراجع (Ctrl+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
-  <button class="tb" id="tbRedo" data-tip="إعادة (Ctrl+Y)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 14 5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+  <button class="tb" id="tbUndo" data-i18n-tip="tipUndo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+  <button class="tb" id="tbRedo" data-i18n-tip="tipRedo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 14 5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
   <span class="sep"></span>
-  <button class="tb" id="tbCenterH" data-tip="توسيط أفقي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18"/><rect x="6" y="6" width="12" height="4" rx="1"/><rect x="8" y="14" width="8" height="4" rx="1"/></svg></button>
-  <button class="tb" id="tbCenterV" data-tip="توسيط رأسي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18"/><rect x="6" y="6" width="4" height="12" rx="1"/><rect x="14" y="8" width="4" height="8" rx="1"/></svg></button>
-  <button class="tb" id="tbFront" data-tip="إحضار للأمام"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="11" height="11" rx="2" fill="currentColor" fill-opacity=".25"/><rect x="10" y="10" width="11" height="11" rx="2"/></svg></button>
+  <button class="tb" id="tbCenterH" data-i18n-tip="tipCenterH"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18"/><rect x="6" y="6" width="12" height="4" rx="1"/><rect x="8" y="14" width="8" height="4" rx="1"/></svg></button>
+  <button class="tb" id="tbCenterV" data-i18n-tip="tipCenterV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18"/><rect x="6" y="6" width="4" height="12" rx="1"/><rect x="14" y="8" width="4" height="8" rx="1"/></svg></button>
+  <button class="tb" id="tbFront" data-i18n-tip="tipFront"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="11" height="11" rx="2" fill="currentColor" fill-opacity=".25"/><rect x="10" y="10" width="11" height="11" rx="2"/></svg></button>
   <span class="sep"></span>
-  <button class="tb" id="tbZoomOut" data-tip="تصغير">−</button>
+  <button class="tb" id="tbZoomOut" data-i18n-tip="tipZoomOut">−</button>
   <span class="zoomlbl" id="zoomLbl">100%</span>
-  <button class="tb" id="tbZoomIn" data-tip="تكبير">+</button>
-  <button class="tb" id="tbPreview" data-tip="معاينة الطباعة (أبيض وأسود)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button class="tb" id="tbZoomIn" data-i18n-tip="tipZoomIn">+</button>
+  <button class="tb" id="tbPreview" data-i18n-tip="tipPreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
 </div>
 
 <div id="pagesBar"></div>
@@ -181,9 +184,9 @@
   <div id="stage">
     <div id="batchBar" style="display:none">
       <span id="bFile" class="hint"></span>
-      <button class="btn" id="bNext">◀</button>
+      <button class="btn" id="bPrev"></button>
       <span id="bPos"></span>
-      <button class="btn" id="bPrev">▶</button>
+      <button class="btn" id="bNext"></button>
       <button class="btn" id="bEdit">⚙</button>
     </div>
     <div id="labelWrap">
@@ -195,119 +198,119 @@
 </main>
 
 <div class="insert">
-  <button class="ins" data-add="text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 8h8M12 8v9"/></svg>نص</button>
-  <button class="ins" data-add="date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M5 3 2 6M19 3l3 3"/></svg>تاريخ وصلاحية</button>
-  <button class="ins" data-add="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>أيقونة</button>
-  <button class="ins" data-add="rect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg>إطار</button>
-  <button class="ins" data-add="line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19 19 5"/></svg>خط</button>
-  <button class="ins" data-add="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M3 15h18M12 10v10"/></svg>جدول</button>
-  <button class="ins" data-add="image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m3 17 5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.5"/></svg>صورة</button>
-  <button class="ins" data-add="qr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v.01M17 21h4v-4M14 18v3"/></svg>QR كود</button>
-  <button class="ins" data-add="barcode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5v14M7 5v14M11 5v14M13 5v14M17 5v14M20 5v14"/></svg>باركود</button>
+  <button class="ins" data-add="text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 8h8M12 8v9"/></svg><span data-i18n="insText"></span></button>
+  <button class="ins" data-add="date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M5 3 2 6M19 3l3 3"/></svg><span data-i18n="insDate"></span></button>
+  <button class="ins" data-add="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg><span data-i18n="insIcon"></span></button>
+  <button class="ins" data-add="rect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg><span data-i18n="insRect"></span></button>
+  <button class="ins" data-add="line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19 19 5"/></svg><span data-i18n="insLine"></span></button>
+  <button class="ins" data-add="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M3 15h18M12 10v10"/></svg><span data-i18n="insTable"></span></button>
+  <button class="ins" data-add="image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m3 17 5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.5"/></svg><span data-i18n="insImage"></span></button>
+  <button class="ins" data-add="qr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v.01M17 21h4v-4M14 18v3"/></svg><span data-i18n="insQr"></span></button>
+  <button class="ins" data-add="barcode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5v14M7 5v14M11 5v14M13 5v14M17 5v14M20 5v14"/></svg><span data-i18n="insBarcode"></span></button>
   <button class="ins" data-add="excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12M8 13l3 4M11 13l-3 4"/></svg>Excel</button>
-  <button class="ins" data-add="serial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16"/></svg>ترقيم</button>
+  <button class="ins" data-add="serial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16"/></svg><span data-i18n="insSerial"></span></button>
 </div>
 
 <!-- connect dialog -->
 <dialog id="dlgConnect">
-  <div class="dlg-h">الاتصال بالطابعة</div>
+  <div class="dlg-h" data-i18n="connTitle"></div>
   <div class="dlg-b">
-    <button class="btn" id="cUsb" style="width:100%;padding:14px;margin-bottom:10px;text-align:right">
-      🔌 <b>كابل USB</b> (موصى به)<br><span class="hint">وصّل الطابعة بالكمبيوتر بالكابل، وبعدها اختارها من القائمة</span></button>
-    <button class="btn" id="cBle" style="width:100%;padding:14px;text-align:right">
-      📶 <b>بلوتوث</b><br><span class="hint">بعض الطابعات بتطلع الورق فاضي بالبلوتوث من الكمبيوتر</span></button>
+    <button class="btn" id="cUsb" style="width:100%;padding:14px;margin-bottom:10px;text-align:start">
+      🔌 <span data-i18n-html="connUsb"></span><br><span class="hint" data-i18n="connUsbHint"></span></button>
+    <button class="btn" id="cBle" style="width:100%;padding:14px;text-align:start">
+      📶 <span data-i18n-html="connBle"></span><br><span class="hint" data-i18n="connBleHint"></span></button>
   </div>
-  <div class="dlg-f"><button class="btn" id="cClose">إلغاء</button></div>
+  <div class="dlg-f"><button class="btn" id="cClose" data-i18n="cancel"></button></div>
 </dialog>
 
 <!-- excel dialog -->
 <dialog id="dlgBatch" style="width:520px">
-  <div class="dlg-h">📊 طباعة جماعية من Excel</div>
+  <div class="dlg-h" data-i18n="xTitle"></div>
   <div class="dlg-b">
     <div class="hint" id="xInfo" style="margin-bottom:10px;line-height:1.8"></div>
-    <button class="btn" id="xPick">📂 اختيار ملف Excel / CSV</button>
+    <button class="btn" id="xPick" data-i18n="xPick"></button>
     <div id="xColsWrap" style="margin-top:14px">
-      <div class="hint" style="margin-bottom:4px">اضغط على عمود عشان تضيفه للعنصر المختار (نص، QR، أو باركود). لو ما في عنصر مختار، حيتعمل نص جديد:</div>
+      <div class="hint" style="margin-bottom:4px" data-i18n="xColsHint"></div>
       <div id="xCols"></div>
       <div id="xPreview"></div>
     </div>
   </div>
   <div class="dlg-f">
-    <button class="btn" id="xClose">تم</button>
-    <button class="btn" id="xClear" style="color:var(--danger)">إلغاء ربط الملف</button>
+    <button class="btn" id="xClose" data-i18n="done"></button>
+    <button class="btn" id="xClear" style="color:var(--danger)" data-i18n="xClear"></button>
   </div>
 </dialog>
 
 <!-- print dialog -->
 <dialog id="dlgPrint">
-  <div class="dlg-h">طباعة</div>
+  <div class="dlg-h" data-i18n="print"></div>
   <div class="dlg-b">
     <div class="row">
-      <div class="field"><label>عدد النسخ (لكل ملصق)</label><input type="number" id="pCopies" min="1" max="999" value="1"></div>
-      <div class="field"><label>الكثافة (الغمق)</label><select id="pDensity"></select></div>
+      <div class="field"><label data-i18n="copies"></label><input type="number" id="pCopies" min="1" max="999" value="1"></div>
+      <div class="field"><label data-i18n="density"></label><select id="pDensity"></select></div>
     </div>
-    <div class="field" id="pWhatField"><label>شنو تطبع؟</label><select id="pWhat"></select></div>
+    <div class="field" id="pWhatField"><label data-i18n="whatToPrint"></label><select id="pWhat"></select></div>
     <div class="field" id="pBatchField" style="background:var(--bg);padding:10px;border-radius:10px">
-      <label class="check"><input type="checkbox" id="pBatchUse" checked> طباعة من ملف Excel — <span id="pBatchInfo"></span></label>
+      <label class="check"><input type="checkbox" id="pBatchUse" checked> <span data-i18n="printFromExcel"></span> <span id="pBatchInfo"></span></label>
       <div class="row">
-        <div class="field" style="margin:0"><label>من صف</label><input type="number" id="pFrom" min="1" value="1"></div>
-        <div class="field" style="margin:0"><label>لحدي صف</label><input type="number" id="pTo" min="1" value="1"></div>
+        <div class="field" style="margin:0"><label data-i18n="fromRow"></label><input type="number" id="pFrom" min="1" value="1"></div>
+        <div class="field" style="margin:0"><label data-i18n="toRow"></label><input type="number" id="pTo" min="1" value="1"></div>
       </div>
     </div>
-    <div class="field" id="serialField"><label>يبدأ الترقيم من</label><input type="number" id="pSerial" value="1"></div>
+    <div class="field" id="serialField"><label data-i18n="serialStart"></label><input type="number" id="pSerial" value="1"></div>
     <div class="progress"><div id="pBar"></div></div>
-    <div class="hint" id="pStatus">جاهز</div>
+    <div class="hint" id="pStatus" data-i18n="ready"></div>
   </div>
   <div class="dlg-f">
-    <button class="btn-primary" id="pGo">طباعة</button>
-    <button class="btn" id="pClose">إغلاق</button>
+    <button class="btn-primary" id="pGo" data-i18n="print"></button>
+    <button class="btn" id="pClose" data-i18n="close"></button>
   </div>
 </dialog>
 
 <!-- settings dialog -->
 <dialog id="dlgSettings">
-  <div class="dlg-h">إعدادات الطابعة</div>
+  <div class="dlg-h" data-i18n="setTitle"></div>
   <div class="dlg-b">
     <div class="hint" id="sInfo" style="margin-bottom:14px;line-height:1.9"></div>
-    <div class="hint" style="margin-bottom:10px;line-height:1.8">NiimDesk 1.0 — برنامج مجاني ومفتوح المصدر لطابعات ملصقات NIIMBOT.<br>غير تابع لشركة NIIMBOT ولا معتمد منها. · <a href="licenses.txt" target="_blank" rel="noopener">التراخيص</a></div>
-    <label class="check"><input type="checkbox" id="sFlip"> قلب اتجاه الطباعة 180°</label>
-    <div class="field"><label>السجل <button class="btn" id="sCopyLog" style="padding:2px 8px;font-size:12px">📋 نسخ السجل</button></label><div id="log"></div></div>
+    <div class="hint" style="margin-bottom:10px;line-height:1.8"><span id="sAbout"></span> · <a href="licenses.txt" target="_blank" rel="noopener" data-i18n="licenses"></a></div>
+    <label class="check"><input type="checkbox" id="sFlip"> <span data-i18n="flip"></span></label>
+    <div class="field"><label><span data-i18n="log"></span> <button class="btn" id="sCopyLog" style="padding:2px 8px;font-size:12px" data-i18n="copyLog"></button></label><div id="log"></div></div>
   </div>
   <div class="dlg-f">
-    <button class="btn-primary" id="sSave">حفظ</button>
-    <button class="btn" id="sClose">إغلاق</button>
+    <button class="btn-primary" id="sSave" data-i18n="save"></button>
+    <button class="btn" id="sClose" data-i18n="close"></button>
   </div>
 </dialog>
 
 <!-- templates dialog -->
 <dialog id="dlgTpl" style="width:640px">
-  <div class="dlg-h">القوالب</div>
+  <div class="dlg-h" data-i18n="tplTitle"></div>
   <div class="dlg-b" style="max-height:70vh;overflow:auto">
-    <div class="sec-title">قوالب جاهزة <span class="hint" style="font-weight:400">— بمقاس الملصق الحالي، اضغط على القالب لإضافته</span></div>
+    <div class="sec-title"><span data-i18n="presetsTitle"></span> <span class="hint" style="font-weight:400" data-i18n="presetsHint"></span></div>
     <div class="presets" id="presetGrid"></div>
-    <div class="sec-title" style="margin-top:18px">قوالبي المحفوظة</div>
+    <div class="sec-title" style="margin-top:18px" data-i18n="myTemplates"></div>
     <div class="tpl-list" id="tplList"></div>
     <div class="row" style="margin-top:12px">
-      <button class="btn" id="tNew">➕ ملصق جديد</button>
-      <button class="btn" id="tExport">⬇ تصدير ملف</button>
-      <button class="btn" id="tImport">⬆ فتح ملف</button>
+      <button class="btn" id="tNew" data-i18n="newLabel"></button>
+      <button class="btn" id="tExport" data-i18n="exportFile"></button>
+      <button class="btn" id="tImport" data-i18n="openFile"></button>
     </div>
-    <div class="sec-title" style="margin-top:18px">نسخة احتياطية <span class="hint" style="font-weight:400">— كل القوالب والسجل والإعدادات في ملف واحد</span></div>
+    <div class="sec-title" style="margin-top:18px"><span data-i18n="backupTitle"></span> <span class="hint" style="font-weight:400" data-i18n="backupHint"></span></div>
     <div class="row">
-      <button class="btn" id="tBackup">💾 حفظ نسخة احتياطية</button>
-      <button class="btn" id="tRestore">♻ استرجاع من ملف</button>
+      <button class="btn" id="tBackup" data-i18n="backupSave"></button>
+      <button class="btn" id="tRestore" data-i18n="backupRestore"></button>
     </div>
   </div>
-  <div class="dlg-f"><button class="btn" id="tClose">إغلاق</button></div>
+  <div class="dlg-f"><button class="btn" id="tClose" data-i18n="close"></button></div>
 </dialog>
 
 <!-- history dialog -->
 <dialog id="dlgHistory" style="width:640px">
-  <div class="dlg-h">🕘 سجل الطباعة</div>
+  <div class="dlg-h" data-i18n="histTitle"></div>
   <div class="dlg-b" style="max-height:65vh;overflow:auto"><div id="histList"></div></div>
   <div class="dlg-f">
-    <button class="btn" id="hClose">إغلاق</button>
-    <button class="btn" id="hClear" style="color:var(--danger)">مسح السجل</button>
+    <button class="btn" id="hClose" data-i18n="close"></button>
+    <button class="btn" id="hClear" style="color:var(--danger)" data-i18n="clearHistory"></button>
   </div>
 </dialog>
 
@@ -321,6 +324,6 @@
 <script src="lib/JsBarcode.all.min.js"></script>
 <script src="lib/niimbluelib.min.js"></script>
 <script src="lib/xlsx.full.min.js"></script>
-<script type="module" src="app.js?v=10"></script>
+<script type="module" src="app.js?v=11"></script>
 </body>
 </html>

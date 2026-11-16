@@ -1,6 +1,6 @@
 # NiimDesk — PC Version
 
-A **free, open-source** label designer for **NIIMBOT** label printers on Windows, with full Arabic (RTL) and English support.
+A **free, open-source** label designer for **NIIMBOT** label printers on Windows. The interface is available in **English, Arabic and Chinese (中文)**.
 
 > ⚠️ NiimDesk is an independent project, **not affiliated with or endorsed by NIIMBOT**. "NIIMBOT" is a trademark of its respective owner.
 
@@ -19,12 +19,13 @@ A **free, open-source** label designer for **NIIMBOT** label printers on Windows
 ## ✨ Features
 
 - **Easy editor:** drag and drop, zoom, rotate, lock, undo/redo, and snapping.
-- **Elements:** Arabic and English text, automatic production/expiry dates, icons, frames, lines, tables, images, QR codes, barcodes (CODE128, EAN13 and more), and serial numbering.
+- **Elements:** text in any language (Arabic, English, Chinese...), automatic production/expiry dates, icons, frames, lines, tables, images, QR codes, barcodes (CODE128, EAN13 and more), and serial numbering.
 - **Multiple pages:** several labels in one file, printed together.
 - **Batch printing from Excel/CSV:** link spreadsheet columns to the label and print one label per row.
 - **Ready-made templates:** price, special offer, shelf life, names, folders, cables and more.
 - **Print history:** reprint any previous label in one click.
 - **Backup/restore:** all templates and settings in a single file.
+- **Three languages:** English, Arabic (right-to-left) and Chinese. Switch from the 🌐 menu at the top.
 - **Works offline.** All data stays on your computer.
 
 ## 🖨️ Printers

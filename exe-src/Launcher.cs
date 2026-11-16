@@ -17,8 +17,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("NiimDesk")]
 [assembly: AssemblyCompany("NiimDesk open-source project")]
 [assembly: AssemblyCopyright("Open-source components: niimbluelib (MIT), JsBarcode (MIT), qrcode-generator (MIT), SheetJS (Apache-2.0)")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 
 static class Program
 {
