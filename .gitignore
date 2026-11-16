@@ -1,0 +1,13 @@
+# build output (the EXE is published as a Release asset, not committed)
+dist/
+
+# local / personal files
+old/
+*.jpeg
+*.jpg
+*.lnk
+log.txt
+log_*.txt
+__pycache__/
+_t.html
+_sim.html
